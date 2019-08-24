@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:buscador_gifs/ui/gif_page.dart';
+import 'package:share/share.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -14,22 +16,22 @@ class _HomePageState extends State<HomePage> {
   int _offset = 0;
 
   _buscarGifs() async {
-    http.Response response;
+    http.Response response; //Declara a variavel que vai traser as respostas do link
 
-    if (_buscar == null)
+    if (_buscar == null || _buscar.isEmpty) //Nulo ou vazio são diferentes.
       response = await http.get(
           "https://api.giphy.com/v1/gifs/trending?api_key=3cK9CE4lcVQ9UTkVh0RBPkPOrq9UMz0a&limit=19&rating=G");
     else
       response = await http.get(
           "https://api.giphy.com/v1/gifs/search?api_key=3cK9CE4lcVQ9UTkVh0RBPkPOrq9UMz0a&q=$_buscar&limit=19&offset=$_offset&rating=G&lang=pt");
 
-    return jsonDecode(response.body);
+    return jsonDecode(response.body); //Trata o json trasido pelo response como um corpo
   }
 
   @override
   void initState() {
     super.initState();
-    _buscarGifs().then((Map) {
+    _buscarGifs().then((Map) { //O buscar gifs agora terá 1 mapa
       print(Map);
     });
   }
@@ -102,23 +104,27 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _criarTabela(BuildContext context, AsyncSnapshot snapshot) {
-    return GridView.builder(
+    return GridView.builder( 
       padding: EdgeInsets.all(10.0),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2, crossAxisSpacing: 10.0, mainAxisSpacing: 10.0),
       itemCount: _getCount(snapshot.data["data"]),
       itemBuilder: (context, index) {
         if (_buscar == null || index < snapshot.data["data"].length)
-          return GestureDetector(
+          return GestureDetector( //detecta a ação que fizer
             onTap: () {
               Navigator.push(
                   context, MaterialPageRoute(builder: (context) => GifPage(snapshot.data["data"][index])));
             },
-            child: Image.network(
-              snapshot.data["data"][index]["images"]["fixed_height"]["url"],
+            child: FadeInImage.memoryNetwork( //Trazer a imagem com uma animação
+              placeholder: kTransparentImage, //pacote de imagem transparent placeholder é a imagem anterior
+              image: snapshot.data["data"][index]["images"]["fixed_height"]["url"],
               height: 300.0,
               fit: BoxFit.cover,
             ),
+            onLongPress: (){
+              Share.share(snapshot.data["data"][index]["images"]["fixed_height"]["url"]);
+            },
           );
         else
           return Container(

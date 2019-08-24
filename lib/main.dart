@@ -4,7 +4,7 @@ import 'package:buscador_gifs/ui/gif_page.dart';
 
 void main(List<String> args) {
   runApp(MaterialApp(
-      home: HomePage(),
+      home: HomePage(), //Aqui a Pagina que sempre vai ser chamada ao iniciar o App
       theme: ThemeData(
           hintColor: Colors.white,
           inputDecorationTheme: InputDecorationTheme(
